@@ -1,5 +1,5 @@
 # Disable all existing local accounts in the Administrators group
-$adminAccounts = Get-LocalGroupMember -Group "Administrators" -ErrorAction SilentlyContinue
+$adminAccounts = Get-LocalGroupMember -Group "Administrators" | Where-Object { $_.PrincipalSource -eq 'Local' } -ErrorAction SilentlyContinue
 
 foreach ($account in $adminAccounts) {
     $accountName = $account.Name
@@ -21,4 +21,5 @@ Remove-Variable accountName
 Remove-Variable newAdminUsername
 Remove-Variable newAdminPassword
 Remove-Variable adminAccount
+
 
