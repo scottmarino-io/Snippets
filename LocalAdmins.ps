@@ -1,0 +1,23 @@
+# Disable all existing local administrator accounts
+$adminAccounts = Get-WmiObject -Class Win32_UserAccount -Filter "LocalAccount=True AND Disabled=False AND SID LIKE 'S-1-5-21-%-500'" -ErrorAction SilentlyContinue
+
+foreach ($account in $adminAccounts) {
+    $accountName = $account.Name
+    Write-Host "Disabling local administrator account: $accountName"
+    Disable-LocalUser -Name $accountName
+}
+
+# Create a new local administrator account
+$newAdminUsername = "EndpointAdmin"
+$newAdminPassword = ConvertTo-SecureString -String "YourPasswordHere" -AsPlainText -Force
+$adminAccount = New-LocalUser -Name $newAdminUsername -Password $newAdminPassword -FullName "Endpoint Admin" -Description "Local Administrator Account"
+Add-LocalGroupMember -Group "Administrators" -Member $newAdminUsername
+
+Write-Host "New local administrator account '$newAdminUsername' created successfully."
+
+# Clean up any remaining artifacts
+Remove-Variable adminAccounts
+Remove-Variable accountName
+Remove-Variable newAdminUsername
+Remove-Variable newAdminPassword
+Remove-Variable adminAccount
