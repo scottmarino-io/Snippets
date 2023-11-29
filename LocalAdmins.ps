@@ -1,8 +1,8 @@
-# Disable all existing local administrator accounts
-$adminAccounts = Get-WmiObject -Class Win32_UserAccount -Filter "LocalAccount=True AND Disabled=False AND SID LIKE 'S-1-5-21-%-500'" -ErrorAction SilentlyContinue
+# Disable all existing local accounts in the Administrators group
+$adminAccounts = Get-WmiObject -Class Win32_GroupUser -Filter "GroupComponent='Win32_Group.Domain='$env:COMPUTERNAME',Name='Administrators''" -ErrorAction SilentlyContinue
 
 foreach ($account in $adminAccounts) {
-    $accountName = $account.Name
+    $accountName = (Get-WmiObject -Class Win32_UserAccount -Filter "SID='$($account.PartComponent -replace '.*=|\\\\', '')'").Name
     Write-Host "Disabling local administrator account: $accountName"
     Disable-LocalUser -Name $accountName
 }
